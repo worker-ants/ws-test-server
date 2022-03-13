@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>test</title>
+
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+<h1>마지막 이벤트 정보</h1>
+<table>
+    <tbody>
+        <tr>
+            <th>이벤트</th>
+            <td id="lastReceiveEvent"></td>
+        </tr>
+        <tr>
+            <th>시간</th>
+            <td id="lastReceiveTimestamp"></td>
+        </tr>
+        <tr>
+            <th>서버 소켓 수</th>
+            <td id="lastReceiveSocketCount"></td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+    (function() {
+        var socket = io('/', {
+            autoConnect: false,
+            transports: ["websocket", "polling"],
+            reconnection: true,
+        });
+
+        socket.onAny(function(event, ...args) {
+           console.log(`receive: ${event}`, args);
+
+           try {
+               var summary = JSON.parse(args);
+               document.getElementById('lastReceiveEvent').innerText = event;
+               document.getElementById('lastReceiveTimestamp').innerText = summary?.timestamp ?? new Date().getTime();
+               document.getElementById('lastReceiveSocketCount').innerText = summary?.socketCount ?? '?';
+           } catch (e) {
+               console.error(e);
+           }
+        });
+
+        socket.connect();
+    })();
+</script>
+</body>
+</html>
