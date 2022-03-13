@@ -38,8 +38,10 @@
 
            try {
                var summary = JSON.parse(args);
+               var timestamp = summary?.timestamp ?? new Date().getTime();
+
                document.getElementById('lastReceiveEvent').innerText = event;
-               document.getElementById('lastReceiveTimestamp').innerText = summary?.timestamp ?? new Date().getTime();
+               document.getElementById('lastReceiveTimestamp').innerText = new Date(timestamp).toLocaleString();
                document.getElementById('lastReceiveSocketCount').innerText = summary?.socketCount ?? '?';
            } catch (e) {
                console.error(e);

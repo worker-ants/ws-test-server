@@ -20,27 +20,35 @@ app.get('/test', function (req, res) {
     }, 100);
 });
 
-io.on('connection', (socket) => {
-    console.log(`ws connect: ${socket.id}`);
+function getTimeString() {
+    return new Date().toLocaleString();
+}
+async function getSocketCount() {
+    return (await io.allSockets()).size ?? 0;
+}
 
-    socket.on('disconnect', (reason) => {
+io.on('connection', async (socket) => {
+    console.log(`ws connect: ${socket.id}`);
+    console.log(`[${getTimeString()}] ${await getSocketCount()}`);
+
+    socket.on('disconnect', async (reason) => {
         console.log(`ws disconnect: ${socket.id} - ${reason}`);
+        console.log(`[${getTimeString()}] ${await getSocketCount()}`);
     });
 });
+
 
 httpServer.listen(env.PORT, () => {
     console.log(`sever running (port: ${env.PORT})`);
 
     const broadCaster = setInterval(async () => {
         const now = new Date();
-        const sockets = await io.allSockets();
         const summary = {
             timestamp: now.getTime(),
-            socketCount: sockets.size,
+            socketCount: await getSocketCount(),
         };
 
         io.emit('broadcast', JSON.stringify(summary));
-        console.log(`[${now.toLocaleString()}] ${summary.socketCount}`);
     }, 1000);
 
     httpServer.on('close', () => {
